@@ -8,6 +8,7 @@ HTML = """
 <html>
 <head>
     <title>CME GCE INFRA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
 body {
@@ -23,6 +24,24 @@ body {
     padding: 15px;
     display: flex;
     justify-content: space-between;
+}
+
+.nav-icon {
+    font-size: 22px;
+    margin-left: 20px;
+    text-decoration: none;
+    color: #00e6e6;   /* bright color */
+    transition: 0.3s ease;
+}
+
+.nav-icon:hover {
+    color: #00ffff;
+    transform: scale(1.2);
+}
+
+.nav-icon:visited,
+.nav-icon:active {
+    color: #00e6e6;
 }
 
 /* CONTAINER */
@@ -123,7 +142,7 @@ footer {
 }
 
 .clock-title {
-    font-size: 14px;
+    font-size: 20px;
     margin-bottom: 5px;
 }
 
@@ -138,7 +157,10 @@ footer {
 
 <div class="navbar">
     <div>CME GCE INFRA</div>
-    <div>Home | Admin | App Team | Contact</div>
+    <div>
+    <a href="/" class="nav-icon" title="Home">🏠</a>
+    <a href="https://chat.google.com/room/AAQAmhbqcd4?cls=7" target="_blank" class="nav-icon" title="Contact">💬</a>
+</div>
 </div>
 
 <div class="container">
@@ -160,10 +182,10 @@ footer {
 
                 <select name="env">
                     <option value="ALL">All Env</option>
-                    <option value="DEV">DEV</option>
-                    <option value="UT">UT</option>
-                    <option value="QA">QA</option>
-                    <option value="PROD">PROD</option>
+                    <option value="dv">DEV</option>
+                    <option value="ut">UT</option>
+                    <option value="qa">QA</option>
+                    <option value="pr">PROD</option>
                 </select>
 
                 <button type="submit">Search</button>
