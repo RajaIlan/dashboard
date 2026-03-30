@@ -10,86 +10,128 @@ HTML = """
     <title>CME GCE INFRA</title>
 
     <style>
-        body {
-            font-family: Arial;
-            margin: 0;
-            background: #f5f6fa;
-        }
+body {
+    font-family: Arial;
+    margin: 0;
+    background: #f5f6fa;
+}
 
-        .navbar {
-            background: #1f2c3a;
-            color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-        }
+/* NAVBAR */
+.navbar {
+    background: #1f2c3a;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+}
 
-        .container {
-            padding: 30px;
-        }
+/* CONTAINER */
+.container {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
 
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 1000px;
-            margin: auto;
-        }
+/* CARD */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 95%;
+    max-width: 1500px;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+}
 
-        .search-bar {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            justify-content: center;
-        }
+/* SEARCH BAR */
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-        .search-bar select {
-            width: 160px;
-            padding: 10px;
-        }
+.search-bar select,
+.search-bar input,
+.search-bar button {
+    padding: 10px;
+}
 
-        .search-bar input {
-            width: 300px;
-            padding: 10px;
-        }
+.search-bar input {
+    width: 300px;
+}
 
-        .search-bar button {
-            width: 120px;
-            padding: 10px;
-            background: #2e6da4;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+.search-bar select {
+    width: 160px;
+}
 
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
+.search-bar button {
+    width: 120px;
+    background: #2e6da4;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
+/* TABLE WRAPPER */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+}
 
-        th {
-            background: #2c3e50;
-            color: white;
-        }
+/* TABLE */
+table {
+    width: 100%;
+    min-width: 1200px;
+    border-collapse: collapse;
+}
 
-        footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: #0b1a2a;
-            color: cyan;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px;
-        }
-    </style>
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+th {
+    background: #2c3e50;
+    color: white;
+}
+
+/* alternating row color */
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* FOOTER */
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #0b1a2a;
+    color: cyan;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    text-align: center;
+}
+
+.clock-block {
+    display: flex;
+    flex-direction: column;
+}
+
+.clock-title {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.clock-time {
+    font-size: 18px;
+    font-weight: bold;
+}
+</style>
 </head>
 
 <body>
@@ -130,6 +172,7 @@ HTML = """
         </form>
 
         {% if searched and results %}
+        <div class="table-container">
         <table>
             <tr>
                 {% for key in results[0].keys() %}
@@ -140,11 +183,12 @@ HTML = """
             {% for row in results %}
             <tr>
                 {% for value in row.values() %}
-                <td>{{ value }}</td>
+                <td title="{{ value }}">{{ value }}</td>
                 {% endfor %}
             </tr>
             {% endfor %}
         </table>
+        </div>
 
         {% elif searched %}
             <p>No records found</p>
@@ -154,9 +198,20 @@ HTML = """
 </div>
 
 <footer>
-    <div>Bangalore: <span id="indiaClock"></span></div>
-    <div>Chicago: <span id="cstClock"></span></div>
-    <div>Belfast: <span id="gmtClock"></span></div>
+    <div class="clock-block">
+        <div class="clock-title">Bangalore</div>
+        <div class="clock-time" id="indiaClock"></div>
+    </div>
+
+    <div class="clock-block">
+        <div class="clock-title">Chicago</div>
+        <div class="clock-time" id="cstClock"></div>
+    </div>
+
+    <div class="clock-block">
+        <div class="clock-title">Belfast</div>
+        <div class="clock-time" id="gmtClock"></div>
+    </div>
 </footer>
 
 <script>
@@ -164,13 +219,22 @@ function updateClocks() {
     const now = new Date();
 
     document.getElementById("indiaClock").innerText =
-        now.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" });
+        now.toLocaleTimeString("en-IN", {
+            timeZone: "Asia/Kolkata",
+            hour12: false
+        });
 
     document.getElementById("cstClock").innerText =
-        now.toLocaleTimeString("en-US", { timeZone: "America/Chicago" });
+        now.toLocaleTimeString("en-US", {
+            timeZone: "America/Chicago",
+            hour12: false
+        });
 
     document.getElementById("gmtClock").innerText =
-        now.toLocaleTimeString("en-GB", { timeZone: "Europe/London" });
+        now.toLocaleTimeString("en-GB", {
+            timeZone: "Europe/London",
+            hour12: false
+        });
 }
 
 setInterval(updateClocks, 1000);
