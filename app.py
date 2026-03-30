@@ -44,6 +44,18 @@ body {
     color: #00e6e6;
 }
 
+.accordion-header {
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+    user-select: none;
+}
+
+.accordion-header:hover {
+    color: #2e6da4;
+}
+
 /* CONTAINER */
 .container {
     padding: 20px;
@@ -166,10 +178,14 @@ footer {
 <div class="container">
     <div class="card">
 
-        <h2>Infrastructure Inventory</h2>
+        <div class="accordion-header" onclick="toggleAccordion()">
+        <span id="arrow">▶</span> Infrastructure Inventory
+    </div>
+
+    <div id="accordion-content" style="display: none;">
 
         <form method="POST">
-            <div class="search-bar">
+        <div class="search-bar">
 
                 <select name="search_type">
                     <option value="appid">App ID</option>
@@ -192,6 +208,7 @@ footer {
 
             </div>
         </form>
+        </div>
 
         {% if searched and results %}
         <div class="table-container">
@@ -261,6 +278,19 @@ function updateClocks() {
 
 setInterval(updateClocks, 1000);
 updateClocks();
+
+function toggleAccordion() {
+    const content = document.getElementById("accordion-content");
+    const arrow = document.getElementById("arrow");
+
+    if (content.style.display === "none") {
+        content.style.display = "block";
+        arrow.innerText = "▼";
+    } else {
+        content.style.display = "none";
+        arrow.innerText = "▶";
+    }
+}
 </script>
 
 </body>
