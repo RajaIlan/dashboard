@@ -1,5 +1,7 @@
 from flask import Flask, render_template_string, request
 import csv
+import requests
+from io import StringIO
 
 app = Flask(__name__)
 
@@ -30,7 +32,7 @@ body {
     font-size: 22px;
     margin-left: 20px;
     text-decoration: none;
-    color: #00e6e6;   /* bright color */
+    color: #00e6e6;
     transition: 0.3s ease;
 }
 
@@ -104,14 +106,13 @@ body {
     cursor: pointer;
 }
 
-/* TABLE WRAPPER */
+/* TABLE */
 .table-container {
     width: 100%;
     overflow-x: auto;
     margin-top: 20px;
 }
 
-/* TABLE */
 table {
     width: 100%;
     min-width: 1200px;
@@ -130,7 +131,6 @@ th {
     color: white;
 }
 
-/* alternating row color */
 tr:nth-child(even) {
     background-color: #f2f2f2;
 }
@@ -170,28 +170,28 @@ footer {
 <div class="navbar">
     <div>CME GCE INFRA</div>
     <div>
-    <a href="/" class="nav-icon" title="Home">🏠</a>
-    <a href="https://chat.google.com/room/AAQAmhbqcd4?cls=7" target="_blank" class="nav-icon" title="Contact">💬</a>
-</div>
+        <a href="/" class="nav-icon">🏠</a>
+        <a href="https://chat.google.com/room/AAQAmhbqcd4?cls=7" target="_blank" class="nav-icon">💬</a>
+    </div>
 </div>
 
 <div class="container">
     <div class="card">
 
         <div class="accordion-header" onclick="toggleAccordion()">
-        <span id="arrow">▶</span> Infrastructure Inventory
-    </div>
+            <span id="arrow">▶</span> Infrastructure Inventory
+        </div>
 
-    <div id="accordion-content" style="display: none;">
+        <div id="accordion-content" style="display: {{ 'block' if searched else 'none' }};">
 
         <form method="POST">
-        <div class="search-bar">
+            <div class="search-bar">
 
                 <select name="search_type">
-                    <option value="appid">App ID</option>
-                    <option value="hostname">Hostname</option>
-                    <option value="bootdisk">Bootdisk</option>
-                    <option value="projectid">ProjectID</option>
+                    <option value="App ID">App ID</option>
+                    <option value="Hostname">Hostname</option>
+                    <option value="Bootdisk">Bootdisk</option>
+                    <option value="ProjectID">ProjectID</option>
                 </select>
 
                 <input type="text" name="query" placeholder="Enter value..." required>
@@ -258,22 +258,13 @@ function updateClocks() {
     const now = new Date();
 
     document.getElementById("indiaClock").innerText =
-        now.toLocaleTimeString("en-IN", {
-            timeZone: "Asia/Kolkata",
-            hour12: false
-        });
+        now.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour12: false });
 
     document.getElementById("cstClock").innerText =
-        now.toLocaleTimeString("en-US", {
-            timeZone: "America/Chicago",
-            hour12: false
-        });
+        now.toLocaleTimeString("en-US", { timeZone: "America/Chicago", hour12: false });
 
     document.getElementById("gmtClock").innerText =
-        now.toLocaleTimeString("en-GB", {
-            timeZone: "Europe/London",
-            hour12: false
-        });
+        now.toLocaleTimeString("en-GB", { timeZone: "Europe/London", hour12: false });
 }
 
 setInterval(updateClocks, 1000);
@@ -307,44 +298,42 @@ def home():
 
         query = request.form['query'].strip().lower()
         search_type = request.form['search_type']
-        env_filter = request.form['env'].upper()
+        env_filter = request.form['env'].lower()
 
-        with open('data.csv', newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
+        url = "https://docs.google.com/spreadsheets/d/1T5f8NbfsZlIwY0aPD0sFwKiFEeJMA6pEe4JV41JjGPY/export?format=csv"
+        response = requests.get(url)
+        csv_data = StringIO(response.text)
 
-            for row in reader:
+        reader = csv.DictReader(csv_data)
 
-                # skip empty rows
-                if not any(row.values()):
-                    continue
+        for row in reader:
 
-                # normalize safely
-                normalized = {
-                    (k or "").replace(" ", "").lower(): (v.strip() if isinstance(v, str) else "")
-                    for k, v in row.items()
-                }
+            if not any(row.values()):
+                continue
 
-                # selected field value
-                value = normalized.get(search_type, "").lower()
+            normalized = {
+                (k or "").replace(" ", "").lower(): (v.strip() if isinstance(v, str) else "")
+                for k, v in row.items()
+            }
 
-                # split keywords
-                keywords = query.split()
+            search_key = search_type.replace(" ", "").lower()
+            value = str(normalized.get(search_key, "")).strip().lower()
 
-                # match selected field
-                field_match = all(word in value for word in keywords)
+            keywords = [str(word).strip().lower() for word in query.split()]
 
-                # global search (all fields)
-                global_value = " ".join(normalized.values()).lower()
-                global_match = all(word in global_value for word in keywords)
+            field_match = any(word in value for word in keywords)
 
-                # final match condition
-                if field_match or global_match:
+            global_value = " ".join(str(v).strip().lower() for v in normalized.values())
+            global_match = any(word in global_value for word in keywords)
 
-                    # environment filter
-                    if env_filter == "ALL" or normalized.get('environment', '').upper() == env_filter:
-                        results.append(row)
+            if field_match or global_match:
+                env_value = normalized.get('environment', '').lower()
+
+                if env_filter == "all" or env_value == env_filter:
+                    results.append(row)
 
     return render_template_string(HTML, results=results, searched=searched)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
