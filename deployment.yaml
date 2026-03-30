@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: time-dashboard
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: time-dashboard
+  template:
+    metadata:
+      labels:
+        app: time-dashboard
+    spec:
+      containers:
+      - name: time-dashboard
+        image: ssitech/time-dashboard:latest
+        ports:
+        - containerPort: 8080

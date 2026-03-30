@@ -1,0 +1,4 @@
+"ProjectID","Hostname","Creation Time","Lifecycle","Environment","Comp ID","Machine type","OS Type","App ID","Bootdisk","Zzone"
+"prj-nmd","p1196-smo-01","12-02-2021","ephermal","prod","coml-451","n2-standard-16","windows","1196","image-1245-4178","us-central1"
+"prj-nmd","p-1196-smv-1","12-02-2021","live","dev","coml-451","n2-standard-8","windows","1196","image-1245-4178","us-east5"
+"prj-cdf","p-2510-buoy-1","12-12-2025","live","uat","coml-173","c2-standard-8","windows","2510","image-12457-84574","us-east5"
